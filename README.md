@@ -34,5 +34,19 @@ Instructions
 ------------
 
 You'll need to install a few packages:
+  - pdns-server and pdns-backend-mysql for PowerDNS
+  - liblinux-inotify2-perl, libdbd-mysql-perl, libgeo-ip-perl for the perl script
+
+sudo apt-get install pdns-{server,backend-mysql} lib{linux-inotify2,dbd-mysql,geo-ip}-perl
+
+Then you'll need to decide how to run the DNS server. You can either decided to make it the default DNS
+server for the system (in which case you'll want to make it listen on the standard port (53) and uninstall
+other DNS servers, and have "nameserver 127.0.0.1" in /etc/resolv.conf), or you'll want it to run as a
+separate nameserver (possibly on a different port), which you'll have to query explicitely.
+
+If the second approach is less intrusive, it also means you won't benefit from it straight away as all
+the gethostbyaddr and anything that using it to resolve IP addresses won't be able to use it.
+
+
 
 TBC
