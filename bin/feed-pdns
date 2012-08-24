@@ -1,0 +1,116 @@
+#! /usr/bin/perl
+use DBI;
+use POSIX;
+use Linux::Inotify2;
+use Geo::IP;
+use File::Basename;
+
+$db = "pdns"; # EDIT
+$table = "records";
+$user = "pdns"; # EDIT
+$password = "some-very-secret-password"; # EDIT
+$dnslogdir = "/nsm/bro/spool/bro"; # EDIT
+$dnslogname = "dns.log";
+$dnslog = "$dnslogdir/$dnslogname";
+
+$dsn = "DBI:mysql:database=$db";
+$dbh = DBI->connect($dsn, $user, $password);
+$dbh->{mysql_auto_reconnect} = 1;
+
+$gi = Geo::IP->new(GEOIP_STANDARD);
+$| = 1;
+
+
+my $inotify = new Linux::Inotify2
+   or die "unable to create new inotify object: $!";
+
+my $replace_query = "replace into $table (name, content, change_date) values (?, ?, ?)";
+my $replace_sth = $dbh->prepare($replace_query);
+  
+my $update_query = "update $table set content = ?, change_date = ? where name = ? and type = 'PTR'";
+my $update_soa_query = "update $table set change_date = ? where name = ? and type = 'SOA'";
+my $insert_query = "insert into $table (domain_id, name, type, content, ttl, prio, change_date) values (0, ?, 'PTR', ?, 60, 0, ?)";
+my $insert_soa_query = "insert into $table (domain_id, name, type, change_date) values (0, ?, 'SOA', ?)";
+my $update_sth = $dbh->prepare($update_query);
+my $update_soa_sth = $dbh->prepare($update_soa_query);
+my $insert_sth = $dbh->prepare($insert_query);
+my $insert_soa_sth = $dbh->prepare($insert_soa_query);
+  
+my ($wf, $wd, $wdp, $fh);
+
+sub watch_file {
+  while (<$fh>) {
+    chomp;
+    next if /^#/;
+
+    my @fields = split "\t";
+
+    # IN A NOERROR
+    if ($fields[9] eq '1' && $fields[11] eq '1' && $fields[13] eq '0')  {
+      my @ips = split ',', $fields[21];
+      my $ts = int($fields[0]);
+      my $ts_string = strftime "%y%m%dT%H%M%S", localtime $ts;
+      my $name = $fields[8];
+
+      for my $ip (@ips) {
+	next if $ip =~ /[^0-9.]/;
+	my $country = $gi->country_code_by_addr($ip);
+	$ip = join(".", reverse(split /\./, $ip)) . ".in-addr.arpa";
+	my $content = $name . ($country ? ".C-$country" : "") . ".$ts_string";
+	if ($update_sth->execute($content, $ts, $ip) == 1) {
+	  $update_soa_sth->execute($ts, $ip);
+	} else {
+	  $insert_sth->execute($ip, $content, $ts);
+	  $insert_soa_sth->execute($ip, $ts);
+	}
+      }
+    }
+  }
+}
+
+sub watch_dir {
+  my $e = shift;
+
+  if ($e->name eq $dnslogname) {
+    if ($e->IN_MOVED_FROM || $e->IN_DELETE) {
+      watch_file;
+      $wf->cancel;
+    } else {
+      watch_file;
+      close $fh if $fh;
+      open $fh, "<", $dnslog;
+      watch_file;
+      $wf = $inotify->watch($dnslog, IN_MODIFY, \&watch_file);
+    }
+  }
+}
+
+sub watch_parent {
+  my $e = shift;
+
+  if ($e->name eq basename($dnslogdir)) {
+    watch_file;
+    $wd->cancel;
+    $wd = $inotify->watch ($dnslogdir, IN_MOVED_FROM|IN_MOVED_TO|IN_CREATE|IN_DELETE, \&watch_dir);
+    my $fh_new;
+    if (open $fh, "<", $dnslog) {
+      $wf->cancel;
+      close $fh if $fh;
+      $fh = $fh_new;
+      watch_file;
+      $wf = $inotify->watch($dnslog, IN_MODIFY, \&watch_file);
+    }
+  }
+}
+
+$wpd = $inotify->watch(dirname($dnslogdir), IN_MOVED_TO|IN_CREATE, \&watch_parent);
+$wd = $inotify->watch ($dnslogdir, IN_MOVED_FROM|IN_MOVED_TO|IN_CREATE|IN_DELETE, \&watch_dir);
+if (-e $dnslog) {
+  open $fh, "<", $dnslog;
+  watch_file;
+  $wf = $inotify->watch($dnslog, IN_MODIFY, \&watch_file);
+}
+
+$inotify->poll while 1;
+
+exit(1);

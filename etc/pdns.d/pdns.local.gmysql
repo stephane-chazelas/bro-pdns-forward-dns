@@ -1,0 +1,5 @@
+# MySQL Configuration
+launch=gmysql
+gmysql-dbname=pdns # EDIT
+gmysql-user=pdns # EDIT
+gmysql-password=some-very-secret-password # EDIT

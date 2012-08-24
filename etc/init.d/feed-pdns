@@ -1,0 +1,46 @@
+#!/bin/sh -
+### BEGIN INIT INFO
+# Provides:          feed-pdns
+# Required-Start:    $network $remote_fs $syslog pdns
+# Required-Stop:     $network $remote_fs $syslog pdns
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Feeds the PowerDNS database with observed forward lookups as PTR records.
+### END INIT INFO
+
+DAEMON=/usr/local/sbin/feed-pdns
+PID_FILE=/var/run/feed-pdns.pid
+
+test -x $DAEMON || exit 0
+
+. /lib/lsb/init-functions
+
+
+case $1 in
+  (start)
+    log_daemon_msg "Starting feed-pdns daemon" "feed-pdns"
+    if start-stop-daemon --start --quiet --background \
+        --chuid pdns-feeder \
+        --pidfile $PID_FILE --make-pidfile \
+        --startas $DAEMON
+    then
+      log_end_msg 0
+    else
+      rm -f -- "$PID_FILE"
+      log_end_msg 1
+    fi
+    ;;
+  (stop)
+    log_daemon_msg "Stopping rsync daemon" "rsync"
+    start-stop-daemon --stop --quiet --oknodo --pidfile "$PID_FILE"
+    log_end_msg $?
+    rm -f "$PID_FILE"
+    ;;
+  (restart)
+    "$0" stop && "$0" start
+    ;;
+  (*)
+    echo >&2 "Usage: $0 {start|stop|restart}"
+    exit 1
+    ;;
+esac
