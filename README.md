@@ -72,6 +72,13 @@ you don't need anything fancy.
 
 Alternatively, you can have a DNS server (like dnsmasq) be the main DNS server,
 so that it serves some domains like the internal ones by itself or forwarding to
-other servers, and have PowerDNS be the "fallback server"
+other servers, and have PowerDNS be the "fallback server". dnsmasq would then do
+some caching which means some DNS responses may be up to one minute stale but on
+the other end that could reduce the load on PowerDNS and MySQL.
+
+The instruction and sample files here go with the approach with PowerDNS at the
+front and dnsmasq as fallback.
+
+
 
 TBC
