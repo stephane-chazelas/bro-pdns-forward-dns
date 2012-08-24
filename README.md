@@ -44,7 +44,7 @@ address and add a couple of entries to PowerDNS so that a PTR query of
 ## Instructions
 
 ***DISCLAIMER***: those are instruction for debian based systems. It is recommanded to
-backup every file, database affected by those instructions before following them.
+backup every file, database... affected by those instructions before following them.
 
 You'll need to install a few packages:
   - pdns-server and pdns-backend-mysql for PowerDNS
@@ -96,12 +96,12 @@ Verify that it works by running:
 
 ### Setting up PowerDNS
 
-You'll need to create the MySQL database. Edit [share/pdns-schema.sql](share/pdns-schema.sql) and
+You'll need to create the MySQL database. Edit [share/pdns-schema.sql](bro-pdns-forward-dns/share/pdns-schema.sql) and
 change the password.
 
 	sudo mysql --defaults-file=/etc/mysql/debian.cnf < share/pdns-schema.sql
 
-Copy [etc/powerdns/pdns.d/pdns.local](etc/powerdns/pdns.d/pdns.local) and [etc/powerdns/pdns.d/pdns.local.gmysql](etc/powerdns/pdns.d/pdns.local.gmysql)
+Copy [etc/powerdns/pdns.d/pdns.local](bro-pdns-forward-dns/etc/powerdns/pdns.d/pdns.local) and [etc/powerdns/pdns.d/pdns.local.gmysql](bro-pdns-forward-dns/etc/powerdns/pdns.d/pdns.local.gmysql)
 to `/etc/powerdns/pdns.d.
 
 Change the password in /etc/powerdns/pdns.d/pdns.local.gmysql to match the one
@@ -136,7 +136,7 @@ We need to create a user to run it as:
 
 	sudo adduser --group --system --no-create-home --home=/ feed-pdns
 
-Copy the [bin/feed-pdns](bin/feed-pdns) to `/usr/local/sbin` and adjust the permissions:
+Copy the [bin/feed-pdns](bro-pdns-forward-dns/bin/feed-pdns) to `/usr/local/sbin` and adjust the permissions:
 
 	sudo install -m 0750 -o root -g feed-pdns bin/feed-pdns /usr/local/sbin/
 
