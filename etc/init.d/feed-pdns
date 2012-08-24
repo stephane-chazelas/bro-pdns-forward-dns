@@ -1,8 +1,8 @@
 #!/bin/sh -
 ### BEGIN INIT INFO
 # Provides:          feed-pdns
-# Required-Start:    $network $remote_fs $syslog pdns
-# Required-Stop:     $network $remote_fs $syslog pdns
+# Required-Start:    mysql pdns
+# Required-Stop:     mysql pdns
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Feeds the PowerDNS database with observed forward lookups as PTR records.
@@ -10,6 +10,7 @@
 
 DAEMON=/usr/local/sbin/feed-pdns
 PID_FILE=/var/run/feed-pdns.pid
+USER=feed-pdns
 
 test -x $DAEMON || exit 0
 
@@ -20,7 +21,7 @@ case $1 in
   (start)
     log_daemon_msg "Starting feed-pdns daemon" "feed-pdns"
     if start-stop-daemon --start --quiet --background \
-        --chuid pdns-feeder \
+        --chuid "$USER" \
         --pidfile $PID_FILE --make-pidfile \
         --startas $DAEMON
     then

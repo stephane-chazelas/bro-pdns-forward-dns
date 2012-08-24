@@ -28,4 +28,4 @@ CREATE TABLE `supermasters` (
   `nameserver` varchar(255) NOT NULL,
   `account` varchar(40) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
-
+GRANT USAGE ON *.* TO 'pdns'@'localhost' IDENTIFIED BY 'some-very-secret-password' /* EDIT */;

@@ -5,11 +5,15 @@ use Linux::Inotify2;
 use Geo::IP;
 use File::Basename;
 
-$db = "pdns"; # EDIT
+$db = "pdns";
 $table = "records";
-$user = "pdns"; # EDIT
+$user = "pdns";
 $password = "some-very-secret-password"; # EDIT
-$dnslogdir = "/nsm/bro/spool/bro"; # EDIT
+
+# which field in dns.log contains the IP address(es) (numbered from 0)
+$address_field = 20; # or 21 (EDIT) 
+
+$dnslogdir = "/usr/local/bro/spool/bro";
 $dnslogname = "dns.log";
 $dnslog = "$dnslogdir/$dnslogname";
 
@@ -47,7 +51,7 @@ sub watch_file {
 
     # IN A NOERROR
     if ($fields[9] eq '1' && $fields[11] eq '1' && $fields[13] eq '0')  {
-      my @ips = split ',', $fields[21];
+      my @ips = split ',', $fields[20];
       my $ts = int($fields[0]);
       my $ts_string = strftime "%y%m%dT%H%M%S", localtime $ts;
       my $name = $fields[8];
