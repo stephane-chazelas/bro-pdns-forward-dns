@@ -70,4 +70,8 @@ or that server for this or that domain. I used pdns-recursor before that, but
 dnsmasq prove to be a lot more flexible. Or you can use an upstream server if
 you don't need anything fancy.
 
+Alternatively, you can have a DNS server (like dnsmasq) be the main DNS server,
+so that it serves some domains like the internal ones by itself or forwarding to
+other servers, and have PowerDNS be the "fallback server"
+
 TBC
