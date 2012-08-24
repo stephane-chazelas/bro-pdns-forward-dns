@@ -1,13 +1,12 @@
-bro-pdns-forward-dns
-====================
+# bro-pdns-forward-dns
 
 THIS IS WORK IN PROGRESS, NOT USABLE AS SUCH
 
 How to setup a DNS server to serve PTR records based on Bro's log of forward
 DNS lookups
 
-Logs from your IDS/servers... are full of hostnames like "23.23.170.22
-[ec2-23-23-170-22.compute-1.amazonaws.com.]".
+Logs from your IDS/servers... are full of hostnames like `"23.23.170.22
+[ec2-23-23-170-22.compute-1.amazonaws.com.]"`.
 
 Not very useful. If it's a log of an outgoing connection, made by someone on
 your network, that IP address is likely to have been resolved from a host name.
@@ -19,8 +18,7 @@ available over DNS queries.
 The instructions are for debian derivative operating systems but can easily be
 adapted to other OSes.
 
-How it Works
-------------
+## How it Works
 
 Bro sniffs the network and logs all the DNS requests and their responses into a dns.log file.
 
@@ -38,23 +36,22 @@ For example, if at 14:17:19, somebody makes a DNS request for foo.example.com,
 and that resolves to 1.2.3.4 (an IP address in Australia), Bro will spot that,
 add a corresponding entry to dns.log, the perl script will geolookup the IP
 address and add a couple of entries to PowerDNS so that a PTR query of
-4.3.2.1.in-addr.arpa. (as in "dig -x 1.2.3.4") will return something like
-foo.example.com.C-AU.120823T141719.
+`4.3.2.1.in-addr.arpa.` (as in `dig -x 1.2.3.4`) will return something like
+`foo.example.com.C-AU.120823T141719`.
 
-Instructions
-------------
+## Instructions
 
 You'll need to install a few packages:
   - pdns-server and pdns-backend-mysql for PowerDNS
   - liblinux-inotify2-perl, libdbd-mysql-perl, libgeo-ip-perl for the perl script
   - optionally dnsmasq for the fallback DNS server
 
-sudo apt-get install pdns-{server,backend-mysql} lib{linux-inotify2,dbd-mysql,geo-ip}-perl
+    sudo apt-get install pdns-{server,backend-mysql} lib{linux-inotify2,dbd-mysql,geo-ip}-perl
 
 Then you'll need to decide how to run the DNS server. You can either decided to
 make it the default DNS server for the system (in which case you'll want to
 make it listen on the standard port (53) and uninstall other DNS servers, and
-have "nameserver 127.0.0.1" in /etc/resolv.conf), or you'll want it to run as a
+have `nameserver 127.0.0.1` in `/etc/resolv.conf`), or you'll want it to run as a
 separate nameserver (possibly on a different port), which you'll have to query
 explicitely.
 
@@ -72,7 +69,7 @@ you don't need anything fancy.
 
 Alternatively, you can have a DNS server (like dnsmasq) be the main DNS server,
 so that it serves some domains like the internal ones by itself or forwarding to
-other servers, and have PowerDNS be the "fallback server". dnsmasq would then do
+other servers, and have PowerDNS be the _fallback server_. dnsmasq would then do
 some caching which means some DNS responses may be up to one minute stale but on
 the other end that could reduce the load on PowerDNS and MySQL.
 
