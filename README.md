@@ -51,7 +51,7 @@ You'll need to install a few packages:
   - liblinux-inotify2-perl, libdbd-mysql-perl, libgeo-ip-perl for the perl script
   - optionally dnsmasq for the fallback DNS server
 
-    sudo apt-get install pdns-{server,backend-mysql} lib{linux-inotify2,dbd-mysql,geo-ip}-perl
+	sudo apt-get install pdns-{server,backend-mysql} lib{linux-inotify2,dbd-mysql,geo-ip}-perl
 
 Then you'll need to decide how to run PowerDNS. You can either decide to
 make it the default DNS server for the system (in which case you'll want to
@@ -96,12 +96,12 @@ Verify that it works by running:
 
 ### Setting up PowerDNS
 
-You'll need to create the MySQL database. Edit [share/pdns-schema.sql] and
+You'll need to create the MySQL database. Edit [share/pdns-schema.sql](share/pdns-schema.sql) and
 change the password.
 
 	sudo mysql --defaults-file=/etc/mysql/debian.cnf < share/pdns-schema.sql
 
-Copy [etc/powerdns/pdns.d/pdns.local] and [etc/powerdns/pdns.d/pdns.local.gmysql]
+Copy [etc/powerdns/pdns.d/pdns.local](etc/powerdns/pdns.d/pdns.local) and [etc/powerdns/pdns.d/pdns.local.gmysql](etc/powerdns/pdns.d/pdns.local.gmysql)
 to `/etc/powerdns/pdns.d.
 
 Change the password in /etc/powerdns/pdns.d/pdns.local.gmysql to match the one
@@ -136,7 +136,7 @@ We need to create a user to run it as:
 
 	sudo adduser --group --system --no-create-home --home=/ feed-pdns
 
-Copy the [bin/feed-pdns] to `/usr/local/sbin` and adjust the permissions:
+Copy the [bin/feed-pdns](bin/feed-pdns) to `/usr/local/sbin` and adjust the permissions:
 
 	sudo install -m 0750 -o root -g feed-pdns bin/feed-pdns /usr/local/sbin/
 
