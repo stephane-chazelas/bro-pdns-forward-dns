@@ -51,7 +51,7 @@ sub watch_file {
 
     # IN A NOERROR
     if ($fields[9] eq '1' && $fields[11] eq '1' && $fields[13] eq '0')  {
-      my @ips = split ',', $fields[20];
+      my @ips = split ',', $fields[$address_field];
       my $ts = int($fields[0]);
       my $ts_string = strftime "%y%m%dT%H%M%S", localtime $ts;
       my $name = $fields[8];
